@@ -5,12 +5,12 @@ import { __unsafe_getAllOwnEventDescriptors, InspectionEvent } from 'xstate';
 import { NextEvents } from './components/NextEvents';
 import { machine } from './machine';
 
-export default function App() {
-  const sky = createSkyClient({
-    apiKey: import.meta.env.VITE_SKY_API_KEY,
-    sessionId: 'onboarding',
-  });
+const sky = createSkyClient({
+  apiKey: import.meta.env.VITE_SKY_API_KEY,
+  sessionId: 'onboarding',
+});
 
+export default function App() {
   const [receivedEvents, setReceivedEvents] = useState<InspectionEvent[]>([]);
   const [state, send, actor] = useMachine(machine, {
     inspect: sky.inspect,
