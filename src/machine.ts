@@ -7,7 +7,7 @@ export const machine = setup({
   },
 }).createMachine({
   context: {},
-  id: 'Sky Demo Machine',
+  id: 'Sky 1.0 Testing Machine',
   initial: 'First State',
   states: {
     'First State': {
@@ -15,9 +15,6 @@ export const machine = setup({
         next: {
           target: 'Second State',
         },
-      },
-      after: {
-        5000: 'Second State',
       },
     },
     'Second State': {
