@@ -9,7 +9,7 @@ export function NextEvents<T extends AnyEventObject>({
 }) {
   return (
     <div className="next-events">
-      <h2>{nextEvents.length > 1 ? 'Next possible events' : 'Next event'}</h2>
+      <p>Next possible event{nextEvents.length > 1 ? 's' : ''}</p>
       <div className="event-buttons">
         {nextEvents.map((event) => (
           <button key={event} onClick={() => send?.({ type: event } as T)}>

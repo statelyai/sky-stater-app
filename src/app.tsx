@@ -1,64 +1,43 @@
-import { useEffect, useState } from 'react';
-import Counter from './examples/counter';
-import TrafficLight from './examples/trafficLight/trafficLight';
-import Home from './home';
+import { createSkyClient } from '@statelyai/sky';
+import { useMachine } from '@xstate/react';
+import { useState } from 'react';
+import { __unsafe_getAllOwnEventDescriptors, InspectionEvent } from 'xstate';
+import { NextEvents } from './components/NextEvents';
+import { machine } from './machine';
 
-const pages = ['home', 'counter', 'trafficlight'] as const;
-type Page = (typeof pages)[number];
-
-function getComponent(page: Page) {
-  switch (page) {
-    case 'home':
-      return <Home />;
-    case 'counter':
-      return <Counter />;
-    case 'trafficlight':
-      return <TrafficLight />;
-  }
-}
-
-function getPage() {
-  if (typeof window !== 'undefined') {
-    const queryParams = new URLSearchParams(window.location.search);
-    const pageQueryParam = queryParams.get('page');
-    if (pageQueryParam && pages.includes(pageQueryParam as Page)) {
-      return pageQueryParam as Page;
-    }
-  }
-  return 'home';
-}
-
-function setPageQueryParam(page: Page) {
-  if (typeof window !== 'undefined') {
-    window.history.replaceState(
-      null,
-      '',
-      `?page=${page}` + window.location.hash,
-    );
-  }
-}
+const sky = createSkyClient({
+  apiKey: import.meta.env.VITE_SKY_API_KEY,
+  sessionId: 'onboarding',
+});
 
 export default function App() {
-  const [page, setPage] = useState<Page>(getPage());
-  useEffect(() => setPageQueryParam(page), [page]);
+  const [receivedEvents, setReceivedEvents] = useState<InspectionEvent[]>([]);
+  const [state, send, actor] = useMachine(machine, {
+    inspect: sky.inspect,
+  });
+
+  sky.inspectListener = (event) => {
+    console.log('event received from Sky', event);
+    setReceivedEvents((events) => [...events, event]);
+  };
+
+  const nextEvents = __unsafe_getAllOwnEventDescriptors(actor.getSnapshot());
 
   return (
     <div className="app">
       <div className="app-header">
-        <p className="sky-header">Stately Sky Starter ⛅</p>
-        <div className="app-pages">
-          {pages.map((p) => (
-            <button
-              key={p}
-              className={p === page ? 'app-active-page' : 'app-page'}
-              onClick={() => setPage(p)}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+        <p className="sky-header">Stately Sky 1.0 WIP ⛅</p>
       </div>
-      {getComponent(page)}
+      <NextEvents nextEvents={nextEvents} send={send} />
+      <div>
+        <p>State of local actor</p>
+        <pre>actor.sessionId: {actor.sessionId}</pre>
+        <pre>{JSON.stringify(state)}</pre>
+        <p>{`Received ${receivedEvents.length} events from Sky`}</p>
+        {receivedEvents.map((event, index) => (
+          <pre key={`event-${index}`}>{JSON.stringify(event)}</pre>
+        ))}
+      </div>
     </div>
   );
 }
