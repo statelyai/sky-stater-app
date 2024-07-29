@@ -33,7 +33,7 @@ export default function App() {
         <p>State of local actor</p>
         <pre>actor.sessionId: {actor.sessionId}</pre>
         <pre>{JSON.stringify(state)}</pre>
-        <p>Received events from Sky</p>
+        <p>{`Received ${receivedEvents.length} events from Sky`}</p>
         {receivedEvents.map((event, index) => (
           <pre key={`event-${index}`}>{JSON.stringify(event)}</pre>
         ))}
